@@ -1,132 +1,157 @@
-import numpy as np
-import skfuzzy as fuzz
+# ============================================================
+# FUNGSI KEANGGOTAAN
+# ============================================================
+
+# ---------------- pH ----------------
+def mu_ph_masam(x):
+    if x <= 0: return 1
+    elif 0 < x < 6: return (6-x)/6
+    else: return 0
+
+def mu_ph_netral(x):
+    if x <= 5: return 0
+    elif 5 < x < 7: return (x-5)/2
+    elif 7 <= x < 9: return (9-x)/2
+    else: return 0
+
+def mu_ph_basa(x):
+    if x <= 8: return 0
+    elif 8 < x < 14: return (x-8)/6
+    else: return 1
+
+# ---------------- KTK ----------------
+def mu_ktk_rendah(x):
+    if x <= 5: return 1
+    elif 5 < x < 17: return (17-x)/12
+    else: return 0
+
+def mu_ktk_sedang(x):
+    if x <= 16: return 0
+    elif 16 < x < 20: return (x-16)/4
+    elif 20 <= x < 25: return (25-x)/5
+    else: return 0
+
+def mu_ktk_tinggi(x):
+    if x <= 24: return 0
+    elif 24 < x < 40: return (x-24)/16
+    else: return 1
+
+# ---------------- C-Organik ----------------
+def mu_c_rendah(x):
+    if x <= 1: return 1
+    elif 1 < x < 2.5: return (2.5-x)/1.5
+    else: return 0
+
+def mu_c_sedang(x):
+    if x <= 2: return 0
+    elif 2 < x < 3: return (x-2)
+    elif 3 <= x < 4: return (4-x)
+    else: return 0
+
+def mu_c_tinggi(x):
+    if x <= 3.5: return 0
+    elif 3.5 < x < 5: return (x-3.5)/1.5
+    else: return 1
+
+# ---------------- N Total ----------------
+def mu_n_rendah(x):
+    if x <= 0.10: return 1
+    elif 0.10 < x < 0.13: return (0.13-x)/0.03
+    else: return 0
+
+def mu_n_sedang(x):
+    if x <= 0.12: return 0
+    elif 0.12 < x < 0.16: return (x-0.12)/0.04
+    elif 0.16 <= x < 0.20: return (0.20-x)/0.04
+    else: return 0
+
+def mu_n_tinggi(x):
+    if x <= 0.19: return 0
+    elif 0.19 < x < 0.25: return (x-0.19)/0.06
+    else: return 1
+
+# ---------------- P Total ----------------
+def mu_p_rendah(x):
+    if x <= 10: return 1
+    elif 10 < x < 21: return (21-x)/11
+    else: return 0
+
+def mu_p_sedang(x):
+    if x <= 20: return 0
+    elif 20 < x < 30: return (x-20)/10
+    elif 30 <= x < 41: return (41-x)/11
+    else: return 0
+
+def mu_p_tinggi(x):
+    if x <= 40: return 0
+    elif 40 < x < 100: return (x-40)/60
+    else: return 1
+
+# ---------------- K Total ----------------
+def mu_k_rendah(x):
+    if x <= 100: return 1
+    elif 100 < x < 155: return (155-x)/55
+    else: return 0
+
+def mu_k_sedang(x):
+    if x <= 150: return 0
+    elif 150 < x < 200: return (x-150)/50
+    elif 200 <= x < 255: return (255-x)/55
+    else: return 0
+
+def mu_k_tinggi(x):
+    if x <= 250: return 0
+    elif 250 < x < 500: return (x-250)/250
+    else: return 1
+
+
+# ============================================================
+# SISTEM FUZZY SUGENO (SAMA COLAB)
+# ============================================================
 
 def kualitas_tanah_fuzzy(pH, KTK, Corg, N, P, K):
 
-    # ======================================================
-    # 1️⃣ FUZZIFIKASI
-    # ======================================================
+    μ_pH = [mu_ph_masam(pH), mu_ph_netral(pH), mu_ph_basa(pH)]
+    μ_KTK = [mu_ktk_rendah(KTK), mu_ktk_sedang(KTK), mu_ktk_tinggi(KTK)]
+    μ_C = [mu_c_rendah(Corg), mu_c_sedang(Corg), mu_c_tinggi(Corg)]
+    μ_N = [mu_n_rendah(N), mu_n_sedang(N), mu_n_tinggi(N)]
+    μ_P = [mu_p_rendah(P), mu_p_sedang(P), mu_p_tinggi(P)]
+    μ_K = [mu_k_rendah(K), mu_k_sedang(K), mu_k_tinggi(K)]
 
-    # ===== pH =====
-    x_pH = np.linspace(0, 14, 100)
-    pH_masam  = fuzz.trimf(x_pH, [0, 0, 6])
-    pH_netral = fuzz.trimf(x_pH, [5, 7, 9])
-    pH_basa   = fuzz.trimf(x_pH, [8, 14, 14])
+    pH_labels = ["Asam", "Netral", "Basa"]
+    other_labels = ["Rendah", "Sedang", "Tinggi"]
 
-    μ_pH = [
-        fuzz.interp_membership(x_pH, pH_masam, pH),
-        fuzz.interp_membership(x_pH, pH_netral, pH),
-        fuzz.interp_membership(x_pH, pH_basa, pH)
-    ]
+    def get_dominant(values, labels):
+        idx = values.index(max(values))
+        return labels[idx], values[idx]
 
+    pH_label, pH_val = get_dominant(μ_pH, pH_labels)
+    KTK_label, KTK_val = get_dominant(μ_KTK, other_labels)
+    C_label, C_val = get_dominant(μ_C, other_labels)
+    N_label, N_val = get_dominant(μ_N, other_labels)
+    P_label, P_val = get_dominant(μ_P, other_labels)
+    K_label, K_val = get_dominant(μ_K, other_labels)
 
-    # ===== KTK =====
-    x_KTK = np.linspace(5, 50, 100)
-    KTK_r = fuzz.trimf(x_KTK, [5, 5, 17])
-    KTK_s = fuzz.trimf(x_KTK, [16, 25, 35])
-    KTK_t = fuzz.trimf(x_KTK, [30, 50, 50])
-
-    μ_KTK = [
-        fuzz.interp_membership(x_KTK, KTK_r, KTK),
-        fuzz.interp_membership(x_KTK, KTK_s, KTK),
-        fuzz.interp_membership(x_KTK, KTK_t, KTK)
-    ]
-
-
-    # ===== C-Organik =====
-    x_C = np.linspace(0, 5, 100)
-    C_r = fuzz.trimf(x_C, [0, 0, 1])
-    C_s = fuzz.trimf(x_C, [0.8, 2, 3])
-    C_t = fuzz.trimf(x_C, [2.5, 5, 5])
-
-    μ_C = [
-        fuzz.interp_membership(x_C, C_r, Corg),
-        fuzz.interp_membership(x_C, C_s, Corg),
-        fuzz.interp_membership(x_C, C_t, Corg)
-    ]
-
-
-    # ===== N Total =====
-    x_N = np.linspace(0, 1, 100)
-    N_r = fuzz.trimf(x_N, [0, 0, 0.2])
-    N_s = fuzz.trimf(x_N, [0.15, 0.4, 0.6])
-    N_t = fuzz.trimf(x_N, [0.5, 1, 1])
-
-    μ_N = [
-        fuzz.interp_membership(x_N, N_r, N),
-        fuzz.interp_membership(x_N, N_s, N),
-        fuzz.interp_membership(x_N, N_t, N)
-    ]
-
-
-    # ===== P Total =====
-    x_P = np.linspace(0, 100, 100)
-    P_r = fuzz.trimf(x_P, [0, 0, 25])
-    P_s = fuzz.trimf(x_P, [20, 50, 70])
-    P_t = fuzz.trimf(x_P, [60, 100, 100])
-
-    μ_P = [
-        fuzz.interp_membership(x_P, P_r, P),
-        fuzz.interp_membership(x_P, P_s, P),
-        fuzz.interp_membership(x_P, P_t, P)
-    ]
-
-
-    # ===== K Total =====
-    x_K = np.linspace(0, 100, 100)
-    K_r = fuzz.trimf(x_K, [0, 0, 25])
-    K_s = fuzz.trimf(x_K, [20, 50, 70])
-    K_t = fuzz.trimf(x_K, [60, 100, 100])
-
-    μ_K = [
-        fuzz.interp_membership(x_K, K_r, K),
-        fuzz.interp_membership(x_K, K_s, K),
-        fuzz.interp_membership(x_K, K_t, K)
-    ]
-
-
-    # ======================================================
-    # 2️⃣ INFERENSI (MIN)
-    # ======================================================
-
-    rules = []
-
-    # RULE 1 → Sehat (semua tinggi & pH netral)
-    alpha_sehat = min(μ_pH[1], μ_KTK[2], μ_C[2], μ_N[2], μ_P[2], μ_K[2])
-    rules.append((alpha_sehat, 2))
-
-    # RULE 2 → Tidak Sehat (pH masam atau unsur rendah)
-    alpha_tidak = max(
-        min(μ_pH[0], μ_KTK[0]),
-        μ_C[0],
-        μ_N[0]
-    )
-    rules.append((alpha_tidak, 0))
-
-    # RULE 3 → Kurang Sehat (kondisi sedang)
-    alpha_kurang = min(μ_pH[1], μ_KTK[1])
-    rules.append((alpha_kurang, 1))
-
-
-    # ======================================================
-    # 3️⃣ DEFUZZIFIKASI SUGENO (WEIGHTED AVERAGE)
-    # ======================================================
-
-    numerator = sum(w * z for w, z in rules)
-    denominator = sum(w for w, z in rules)
-
-    if denominator == 0:
-        return 0
-
-    hasil = numerator / denominator
-
-    # ======================================================
-    # 4️⃣ KLASIFIKASI AKHIR
-    # ======================================================
-
-    if hasil < 0.5:
-        return 0      # Tidak Sehat
-    elif hasil < 1.5:
-        return 1      # Kurang Sehat
+    # Rule 
+    if (pH_label=="Netral" and KTK_label=="Tinggi" and
+        C_label=="Tinggi" and N_label=="Tinggi" and
+        P_label=="Tinggi" and K_label=="Tinggi"):
+        z_rule = 2
+    elif (pH_label=="Asam" or C_label=="Rendah" or N_label=="Rendah"):
+        z_rule = 0
     else:
-        return 2      # Sehat
+        z_rule = 1
+
+    alpha_predikat = min(pH_val, KTK_val, C_val, N_val, P_val, K_val)
+
+    if alpha_predikat != 0:
+        z_defuzz = (alpha_predikat * z_rule) / alpha_predikat
+    else:
+        z_defuzz = 0
+
+    if z_defuzz >= 1.5:
+        return 2
+    elif z_defuzz <= 0.5:
+        return 0
+    else:
+        return 1
