@@ -77,9 +77,16 @@ Sistem menghasilkan:
 
 ---
 
-## ⚙️ Cara Instalasi & Menjalankan
+## ⚙️ Instalasi, Menjalankan, dan Penggunaan Sistem
 
-### 1️⃣ Clone Repository
+Panduan ini menjelaskan langkah-langkah untuk menginstall, menjalankan, dan menggunakan aplikasi web klasifikasi kualitas tanah berbasis Fuzzy Sugeno.
+
+---
+
+## 🧩 1. Clone Repository
+
+Unduh project dari GitHub ke komputer Anda:
+
 ```bash
 git clone https://github.com/username/kualitas_tanah.git
 cd kualitas_tanah
@@ -88,3 +95,5 @@ venv\Scripts\activate
 pip install -r requirements.txt
 python manage.py runserver
 http://127.0.0.1:8000/
+Input Data → Fuzzifikasi → Rule Base → Inferensi → Defuzzifikasi → Output
+
